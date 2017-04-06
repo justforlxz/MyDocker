@@ -1,0 +1,9 @@
+version: '2'
+services:
+  ssr-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1080:1080"
+    restart: always
