@@ -1,22 +1,29 @@
-#
-# Dockerfile for ProxyChain
-#
+FROM alpine
+MAINTAINER smounives <smounives@outlook.com>
 
-FROM ubuntu:16.04
-MAINTAINER kirigaya kazushin <kirigaya@mkacg.com>
+RUN set -ex \
+    && if [ $(wget -qO- ipinfo.io/country) == CN ]; then echo "http://mirrors.aliyun.com/alpine/latest-stable/main/" > /etc/apk/repositories ;fi \
+    && apk --update add --no-cache libsodium py-pip \
+    && pip --no-cache-dir install https://github.com/shadowsocksr/shadowsocksr/archive/manyuser.zip
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        supervisor \
-        git \
-    && rm -rf /var/lib/apt/lists/* \
-    && cd /opt \
-    && git clone -b manyuser https://github.com/breakwa11/shadowsocks.git 
+ENV SERVER_ADDR 0.0.0.0
+ENV SERVER_PORT 8388
+ENV PASSWORD=
+ENV METHOD aes-256-cfb
+ENV PROTOCOL origin
+ENV TIMEOUT 300
+ENV OBFS plain
+ENV LOCAL_ADDR 0.0.0.0
+ENV LOCAL_PORT 1080
 
-COPY init.sh /init.sh
-COPY user-config.json /opt/shadowsocks/
-COPY supervisord.conf /etc/supervisor/
-COPY services.conf /etc/supervisor/conf.d/
-
-EXPOSE 1080
-
-ENTRYPOINT ["/init.sh", "/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+ENTRYPOINT ["/usr/bin/sslocal"]
+CMD ssserver -s "$SERVER_ADDR" \
+             -p "$SERVER_PORT" \
+             -b "$LOCAL_ADDR"  \
+             -l "$LOCAL_PORT"  \
+             -m "$METHOD"      \
+             -k "$PASSWORD"    \
+             -t "$TIMEOUT"     \
+             -O "$PROTOCOL"    \
+             -o "$OBFS"        \
+             --fast-open $OPTIONS
