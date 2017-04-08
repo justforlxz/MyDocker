@@ -6,24 +6,9 @@ RUN set -ex \
     && apk --update add --no-cache libsodium py-pip \
     && pip --no-cache-dir install https://github.com/shadowsocksr/shadowsocksr/archive/manyuser.zip
 
-ENV SERVER_ADDR 0.0.0.0
-ENV SERVER_PORT 8388
-ENV PASSWORD=
-ENV METHOD aes-256-cfb
-ENV PROTOCOL origin
-ENV TIMEOUT 300
-ENV OBFS plain
-ENV LOCAL_ADDR 0.0.0.0
-ENV LOCAL_PORT 1080
+RUN mkdir -p /etc/ssr
+WORKDIR /etc/ssr
 
 ENTRYPOINT ["/usr/bin/sslocal"]
-CMD ssserver -s "$SERVER_ADDR" \
-             -p "$SERVER_PORT" \
-             -b "$LOCAL_ADDR"  \
-             -l "$LOCAL_PORT"  \
-             -m "$METHOD"      \
-             -k "$PASSWORD"    \
-             -t "$TIMEOUT"     \
-             -O "$PROTOCOL"    \
-             -o "$OBFS"        \
-             --fast-open $OPTIONS
+
+CMD sslocal -c /etc/ssr/user-config.json

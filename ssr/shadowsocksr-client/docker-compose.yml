@@ -1,10 +1,11 @@
 version: '2'
 services:
-  ssr:
+  ssr-client:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "1080:1080"
-    command: "-s 0.0.0.0 -p 9527 -b 0.0.0.0 -l 1080 -k password -m aes-256-cfb -o tls1.2_ticket_auth -O auth_sha1_v4"
+    volumes:
+      - $PWD:/etc/ssr
     restart: always
